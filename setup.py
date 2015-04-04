@@ -3,21 +3,22 @@ import os
 from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, 'README.txt')) as f:
+with open(os.path.join(here, 'README.rst')) as f:
     README = f.read()
     with open(os.path.join(here, 'CHANGES.txt')) as f:
         CHANGES = f.read()
 
 requires = [
     'pyramid',
-    'pyramid_mako',
+    'pyramid_jinja2',
     'pyramid_tm',
     'SQLAlchemy',
     'transaction',
     'zope.sqlalchemy',
     'waitress',
     'cliff',
-    'pyramid_sqlalchemy'
+    'pyramid_sqlalchemy',
+    'pyramid_services'
 ]
 
 setup(name='urakata',
@@ -47,5 +48,6 @@ setup(name='urakata',
       [urakata.commands]
       initialize = urakata.scripts.initialize:Initialize
       clean = urakata.scripts.clean:Clean
+      scan = urakata.scripts.scan:Scan
       """,
       )
