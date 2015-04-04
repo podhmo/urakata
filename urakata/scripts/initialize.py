@@ -14,5 +14,6 @@ class Initialize(Command):
 
     def take_action(self, parsed_args):
         from pyramid.paster import bootstrap
-        env = bootstrap(parsed_args.config)
-        print(env)
+        from urakata.models import Base
+        bootstrap(parsed_args.config)
+        Base.metadata.create_all()

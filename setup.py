@@ -16,7 +16,8 @@ requires = [
     'transaction',
     'zope.sqlalchemy',
     'waitress',
-    'cliff'
+    'cliff',
+    'pyramid_sqlalchemy'
 ]
 
 setup(name='urakata',
