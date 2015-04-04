@@ -16,6 +16,7 @@ requires = [
     'transaction',
     'zope.sqlalchemy',
     'waitress',
+    'cliff'
 ]
 
 setup(name='urakata',
@@ -41,6 +42,8 @@ setup(name='urakata',
       [paste.app_factory]
       main = urakata:main
       [console_scripts]
-      initialize_urakata_db = urakata.scripts.initializedb:main
+      urakata = urakata.scripts.urakata:main
+      [urakata.commands]
+      initialize = urakata.scripts.initialize:Initialize
       """,
       )
