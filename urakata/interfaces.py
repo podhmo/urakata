@@ -5,6 +5,11 @@ from zope.interface import (
 )
 
 
+class IPredicateList(Interface):
+    def __iter__():
+        pass
+
+
 class IScanConfig(Interface):
     root = Attribute("root name[IString]")
     parameters = Attribute("parameters[ISet]")
@@ -18,14 +23,23 @@ class INameScanner(Interface):
     def scan(filename):
         pass
 
+    def replace(filename, env):
+        pass
+
 
 class ITemplateScanner(Interface):
     config = Attribute("config[IScanConfig]")
 
-    def is_template(name):
+    def is_template_name(name):
+        pass
+
+    def normalize_name(name):
         pass
 
     def scan(io):
+        pass
+
+    def replace(content, env):
         pass
 
 

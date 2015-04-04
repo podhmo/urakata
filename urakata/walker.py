@@ -1,7 +1,10 @@
 # -*- coding:utf-8 -*-
 import os
 from pyramid.decorator import reify
-from .interfaces import INameScanner, ITemplateScanner, IScanConfig
+from .interfaces import (
+    IScanConfig,
+    IPredicateList
+)
 import logging
 logger = logging.getLogger(__name__)
 
@@ -12,19 +15,21 @@ class DirectoryWalker(object):
         self.root = root
 
     @reify
+    def predicates(self):
+        return self.request.find_service(IPredicateList)
+
+    @reify
     def config(self):
         factory = self.request.find_service(IScanConfig)
-        return factory(self.root)
+        return factory(self.request, self.root)
 
     @reify
     def name_scanner(self):
-        factory = self.request.find_service(INameScanner)
-        return factory(self.config)
+        return self.config.name_scanner
 
     @reify
     def template_scanner(self):
-        factory = self.request.find_service(ITemplateScanner)
-        return factory(self.config)
+        return self.config.template_scanner
 
     def register(self, abspath, content):
         name = abspath.replace(self.root, "")
@@ -32,6 +37,7 @@ class DirectoryWalker(object):
 
     def walk(self):
         for r, ds, fs in os.walk(self.root):
+            ds[:] = [d for d in ds for p in self.predicates if p(d)]
             for d in ds:
                 self.name_scanner.scan(d)
             for f in fs:
@@ -41,7 +47,7 @@ class DirectoryWalker(object):
                 with open(fullpath) as rf:
                     try:
                         self.register(fullpath, rf.read())
-                        if self.template_scanner.is_template(f):
+                        if self.template_scanner.is_template_name(f):
                             rf.seek(0)
                             self.template_scanner.scan(rf)
                     except UnicodeDecodeError:

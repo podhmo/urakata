@@ -1,3 +1,4 @@
+import re
 from pyramid.config import Configurator
 
 
@@ -17,7 +18,20 @@ def register_walker(config):
     from .interfaces import (
         INameScanner,
         ITemplateScanner,
+        IPredicateList,
         IScanConfig)
     config.register_service(NameScanner, INameScanner)
     config.register_service(Jinja2Scanner, ITemplateScanner)
     config.register_service(ScanConfig, IScanConfig)
+    predicates = [
+        RegexExcludePredicate(re.compile("(?:__pycache__|\.pyc|\.git|\.hg)$"))
+    ]
+    config.register_service(predicates, IPredicateList)
+
+
+class RegexExcludePredicate(object):
+    def __init__(self, rx):
+        self.rx = rx
+
+    def __call__(self, name):
+        return not self.rx.search(name)

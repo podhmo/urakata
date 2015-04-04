@@ -49,5 +49,6 @@ setup(name='urakata',
       initialize = urakata.scripts.initialize:Initialize
       clean = urakata.scripts.clean:Clean
       scan = urakata.scripts.scan:Scan
+      emit = urakata.scripts.emit:Emit
       """,
       )
