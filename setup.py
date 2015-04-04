@@ -46,5 +46,6 @@ setup(name='urakata',
       urakata = urakata.scripts.urakata:main
       [urakata.commands]
       initialize = urakata.scripts.initialize:Initialize
+      clean = urakata.scripts.clean:Clean
       """,
       )
