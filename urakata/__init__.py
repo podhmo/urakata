@@ -14,14 +14,10 @@ def main(global_config, **settings):
 
 
 def register_walker(config):
-    from .scanner import NameScanner, Jinja2Scanner, ScanConfig
+    from .scanner import ScanConfig
     from .interfaces import (
-        INameScanner,
-        ITemplateScanner,
         IPredicateList,
         IScanConfig)
-    config.register_service(NameScanner, INameScanner)
-    config.register_service(Jinja2Scanner, ITemplateScanner)
     config.register_service(ScanConfig, IScanConfig)
     predicates = [
         RegexExcludePredicate(re.compile("(?:__pycache__|\.pyc|\.git|\.hg)$"))

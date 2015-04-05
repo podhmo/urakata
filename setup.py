@@ -18,7 +18,8 @@ requires = [
     'waitress',
     'cliff',
     'pyramid_sqlalchemy',
-    'pyramid_services'
+    'pyramid_services',
+    'prestring'
 ]
 
 setup(name='urakata',
@@ -51,5 +52,6 @@ setup(name='urakata',
       scan = urakata.scripts.scan:Scan
       emit = urakata.scripts.emit:Emit
       register = urakata.scripts.register:Register
+      codegen = urakata.scripts.codegen:Codegen
       """,
       )

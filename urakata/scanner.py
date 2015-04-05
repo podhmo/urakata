@@ -32,13 +32,11 @@ class ScanConfig(object):
 
     @reify
     def name_scanner(self):
-        factory = self.request.find_service(INameScanner)
-        return factory(self)
+        return NameScanner(self)
 
     @reify
     def template_scanner(self):
-        factory = self.request.find_service(ITemplateScanner)
-        return factory(self)
+        return Jinja2Scanner(self)
 
 
 @implementer(INameScanner)
@@ -66,7 +64,7 @@ class Jinja2Scanner(object):
     @reify
     def environment(self):
         from jinja2.environment import Environment
-        return Environment()  # todo: input encofing, customize
+        return Environment()  # todo: input encoding, customize
 
     def is_template_name(self, name):
         return name.endswith(".tmpl")
