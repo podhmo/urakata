@@ -54,5 +54,6 @@ setup(name='urakata',
       register = urakata.scripts.register:Register
       codegen = urakata.scripts.codegen:Codegen
       list = urakata.scripts.list:List
+      show = urakata.scripts.show:Show
       """,
       )
