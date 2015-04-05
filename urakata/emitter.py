@@ -39,7 +39,7 @@ class EmitEnv(Mapping):
         while True:
             self.output_port.write(usage)
             self.output_port.flush()
-            value = self.input_port.read().rstrip()
+            value = self.input_port.read().rstrip() or self.defaults.get(k)
             if value:
                 return value
 
@@ -77,10 +77,10 @@ class Emitter(object):
         dirpath = os.path.dirname(fullpath)
 
         if not os.path.exists(dirpath):
-            logger.debug("emit[D] -- %s", dirpath)
+            logger.info("emit[D] -- %s", dirpath)
             os.makedirs(dirpath)
 
-        logger.debug("emit[F] -- %s", fullpath)
+        logger.info("emit[F] -- %s", fullpath)
         with open(fullpath, "w") as wf:
             wf.write(content)
 

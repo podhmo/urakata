@@ -32,7 +32,7 @@ class DirectoryWalker(object):
         return self.config.template_scanner
 
     def register(self, abspath, content):
-        name = abspath.replace(self.root, "")
+        name = abspath.replace(self.root, "").lstrip("/")
         self.config.add_content(name, content)
 
     def walk(self):
@@ -43,7 +43,7 @@ class DirectoryWalker(object):
             for f in fs:
                 self.name_scanner.scan(f)
                 fullpath = os.path.join(r, f)
-                logger.debug("walk[F] -- %s", fullpath)
+                logger.info("walk[F] -- %s", fullpath)
                 with open(fullpath) as rf:
                     try:
                         self.register(fullpath, rf.read())

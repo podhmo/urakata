@@ -8,13 +8,13 @@ from .interfaces import INameScanner, ITemplateScanner, IScanConfig
 
 @implementer(IScanConfig)
 class ScanConfig(object):
-    def __init__(self, request, root):
+    def __init__(self, request, root, defaults=None, usages=None, contents=[]):
         self.request = request
         self.root = root
         self.parameters = set()
-        self.defaults = defaultdict(str)
-        self.usages = defaultdict(str)
-        self.contents = OrderedDict()  # name -> content
+        self.defaults = defaults or defaultdict(str)
+        self.usages = usages or defaultdict(str)
+        self.contents = OrderedDict(contents) or OrderedDict()  # name -> content
 
     def add_usage(self, name, usage):
         self.usages[name] = usage
@@ -86,4 +86,4 @@ class Jinja2Scanner(object):
         from jinja2 import Template
         from jinja2.utils import concat
         t = Template(content)
-        return concat(t.root_render_func(t.new_context(env)))
+        return concat(t.root_render_func(t.new_context(env, shared=True)))
