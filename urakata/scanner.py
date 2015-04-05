@@ -25,6 +25,11 @@ class ScanConfig(object):
     def add_content(self, name, content):
         self.contents[name] = content
 
+    def fill_defaults(self, v=""):
+        for p in self.parameters:
+            if p not in self.defaults:
+                self.add_default(p, v)
+
     @reify
     def name_scanner(self):
         factory = self.request.find_service(INameScanner)

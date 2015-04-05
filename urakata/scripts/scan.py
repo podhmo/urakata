@@ -22,5 +22,6 @@ class Scan(Command):
         request = env["request"]
         walker = get_walker(request, parsed_args.root)
         walker.walk()
+        walker.config.fill_defaults("")
         extractor = get_extractor(request)
         print(extractor.extract(parsed_args.name, walker.config))
