@@ -44,5 +44,5 @@ class ITemplateScanner(Interface):
 
 
 class IExtractor(Interface):
-    def extract(name, config):
+    def extract(name, target):
         pass

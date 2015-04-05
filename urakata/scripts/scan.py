@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import logging
+import json
 from cliff.command import Command
 logger = logging.getLogger(__name__)
 
@@ -24,4 +25,5 @@ class Scan(Command):
         walker.walk()
         walker.config.fill_defaults("")
         extractor = get_extractor(request)
-        print(extractor.extract(parsed_args.name, walker.config))
+        data = extractor.extract(parsed_args.name, walker.config)
+        print(json.dumps(data, indent=2, ensure_ascii=False))

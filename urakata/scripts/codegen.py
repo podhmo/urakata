@@ -19,6 +19,7 @@ class Codegen(Command):
         from urakata.repositories import ScaffoldRepository
         from urakata.services import get_codegen, get_scan_config
         from urakata.emitter import get_emitter
+        from urakata.extractor import get_extractor
         from urakata.models import Base
         env = bootstrap(parsed_args.config)
 
@@ -32,4 +33,5 @@ class Codegen(Command):
         codegen = get_codegen(request)
         root = None
         emitter = get_emitter(request, root, get_scan_config(request, root))
-        print(codegen.codegen(scaffold, emitter))
+        data = get_extractor(request).extract(scaffold.name, scaffold)
+        print(codegen.codegen(data, emitter))

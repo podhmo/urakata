@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import inspect
+import json
 from prestring.python import PythonModule
 from urakata.decorator import reify
 from urakata.emitter import InputWrapper
@@ -14,10 +15,17 @@ class CodeGenerator(object):
     def get_source_code(self, ob):
         return inspect.getsource(ob.__class__)
 
-    def build_main(self, scaffold):
-        pass
+    def emit_dict(self, fmt, data):
+        stmt = fmt.format(json.dumps(data, indent=2, ensure_ascii=False))
+        for line in stmt.split("\n"):
+            self.m.stmt(line)
 
-    def codegen(self, scaffold, emitter):
+    def build_main(self, data):
+        self.emit_dict("defaults = {}", data["defaults"])
+        self.emit_dict("usages = {}", data["usages"])
+        # import pdb; pdb.set_trace()
+
+    def codegen(self, extracted, emitter):
         self.m.stmt(self.get_source_code(emitter))
         self.m.stmt(self.get_source_code(emitter.env))
         self.m.stmt(self.get_source_code(emitter.config))
@@ -36,6 +44,10 @@ class CodeGenerator(object):
         self.toplevel.sep()
         self.toplevel.stmt(inspect.getsource(reify))
         self.toplevel.stmt(inspect.getsource(InputWrapper))
+
+        # main
+        with self.m.def_("main"):
+            self.build_main(extracted)
         return self.m
 
 

@@ -21,11 +21,15 @@ class AddScaffold(object):
     def add_scaffold(self, data):
         name = data["name"]
         version = data["version"]
+        parameters = data["parameters"]
+        defaults = data["defaults"]
+        usages = data["usages"]
+
         scaffold = self.repository.get_scaffold(name)
         if scaffold is None:
-            return self.repository.register_scaffold(name, version)
+            return self.repository.register_scaffold(name, version, parameters, defaults, usages)
         else:
-            return scaffold.swap(name, version)
+            return scaffold.swap(name, version, parameters, defaults, usages)
         return scaffold
 
     def add_template(self, scaffold, data):

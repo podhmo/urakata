@@ -1,7 +1,10 @@
 # -*- coding:utf-8 -*-
 import logging
+import json
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
+from sqlalchemy.types import TypeDecorator, VARCHAR
+from sqlalchemy.ext.mutable import MutableDict, Mutable
 from sqlalchemy.orm.session import object_session
 from datetime import datetime
 from pyramid_sqlalchemy import BaseObject as Base
@@ -9,6 +12,50 @@ from pyramid_sqlalchemy import Session as ObjectSession
 from .exceptions import ModelException
 Session = ObjectSession
 logger = logging.getLogger(__name__)
+
+
+class MutableList(Mutable, list):
+    @classmethod
+    def coerce(cls, key, value):
+        "Convert plain listionaries to MutableList."
+
+        if not isinstance(value, MutableList):
+            if isinstance(value, list):
+                return MutableList(value)
+
+            # this call will raise ValueError
+            return Mutable.coerce(key, value)
+        else:
+            return value
+
+    def __setitem__(self, key, value):
+        "Detect list set events and emit change events."
+
+        list.__setitem__(self, key, value)
+        self.changed()
+
+    def __delitem__(self, key):
+        "Detect list del events and emit change events."
+
+        list.__delitem__(self, key)
+        self.changed()
+
+
+class JSONEncodedObject(TypeDecorator):
+    "Represents an immutable structure as a json-encoded string."
+
+    impl = VARCHAR
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            value = json.dumps(value)
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            value = json.loads(value)
+        return value
+
 
 
 class TimeMixin(object):
@@ -54,8 +101,13 @@ class Repository(TimeMixin, Base):
     account = orm.relationship(Account, backref=orm.backref("repositories", cascade="all, delete-orphan"))
     name = sa.Column(sa.String(length=255), default="", nullable=False, unique=True)
 
-    def register_scaffold(self, name, version):
-        scaffold = Scaffold(name=name, version=version, repository=self)
+    def register_scaffold(self, name, version, parameters, defaults, usages):
+        scaffold = Scaffold(name=name,
+                            version=version,
+                            repository=self,
+                            parameters=parameters,
+                            defaults=defaults,
+                            usages=usages)
         session = object_session(self)
         session.add(scaffold)
         return scaffold
@@ -74,6 +126,9 @@ class Scaffold(TimeMixin, Base):
     id = sa.Column(sa.Integer, primary_key=True)
     version = sa.Column(sa.String(length=16), default="0.0.1", nullable=False)
     name = sa.Column(sa.String(length=255), default="", nullable=False, unique=True)
+    parameters = sa.Column(MutableList.as_mutable(JSONEncodedObject), nullable=False, default="")
+    defaults = sa.Column(MutableDict.as_mutable(JSONEncodedObject), nullable=False, default="")
+    usages = sa.Column(MutableDict.as_mutable(JSONEncodedObject), nullable=False, default="")
     repository_id = sa.Column(sa.Integer, sa.ForeignKey("repository.id"))
     repository = orm.relationship(Repository, backref=orm.backref("scaffolds", cascade="all, delete-orphan"))
 
@@ -102,13 +157,24 @@ class Scaffold(TimeMixin, Base):
         #         return True
         return False
 
-    def swap(self, name, version):
+    def swap(self, name, version, parameters, defaults, usages):
         if self.is_version_conflict(version):
             raise ModelException("version conflict")
-        history = ScaffoldHistory(name=self.name, version=self.version, scaffold=self)
+
+        history = ScaffoldHistory(name=self.name,
+                                  version=self.version,
+                                  scaffold=self,
+                                  parameters=self.parameters,
+                                  defaults=self.defaults,
+                                  usages=self.usages)
         history.swap(self)
+
         self.name = name
         self.version = version
+        self.parameters = parameters
+        self.defaults = defaults
+        self.usages = usages
+
         session = object_session(self)
         session.add(history)
         session.query(Template).filter(Template.scaffold == self).delete()
