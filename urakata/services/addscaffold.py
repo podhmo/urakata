@@ -24,6 +24,8 @@ class AddScaffold(object):
         scaffold = self.repository.get_scaffold(name)
         if scaffold is None:
             return self.repository.register_scaffold(name, version)
+        else:
+            return scaffold.swap(name, version)
         return scaffold
 
     def add_template(self, scaffold, data):

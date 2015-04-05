@@ -6,6 +6,7 @@ from sqlalchemy.orm.session import object_session
 from datetime import datetime
 from pyramid_sqlalchemy import BaseObject as Base
 from pyramid_sqlalchemy import Session as ObjectSession
+from .exceptions import ModelException
 Session = ObjectSession
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ class Repository(TimeMixin, Base):
 
     def get_scaffold(self, name):
         for s in self.scaffolds:
-            if s.name == s:
+            if s.name == s.name:
                 return s
 
 
@@ -86,6 +87,34 @@ class Scaffold(TimeMixin, Base):
         session.add(template)
         return template
 
+    def is_version_conflict(self, version):
+        if version == self.version:
+            return True
+        session = object_session(self)
+        qs = session.query(ScaffoldHistory).filter(
+            ScaffoldHistory.scaffold == self,
+            ScaffoldHistory.version == version
+        )
+        if session.query(qs.exists()).scalar():
+            return True
+        # for history in self.histories:
+        #     if history.version == version:
+        #         return True
+        return False
+
+    def swap(self, name, version):
+        if self.is_version_conflict(version):
+            raise ModelException("version conflict")
+        history = ScaffoldHistory(name=self.name, version=self.version, scaffold=self)
+        history.swap(self)
+        self.name = name
+        self.version = version
+        session = object_session(self)
+        session.add(history)
+        session.query(Template).filter(Template.scaffold == self).delete()
+        session.add(self)
+        return self
+
 
 class Template(TimeMixin, Base):
     __tablename__ = "template"
@@ -105,10 +134,19 @@ class ScaffoldHistory(TimeMixin, Base):
     version = sa.Column(sa.String(length=16), default="0.0.1", nullable=False)
     name = sa.Column(sa.String(length=255), default="", nullable=False)
     scaffold_id = sa.Column(sa.Integer, sa.ForeignKey("scaffold.id"))
+    scaffold = orm.relationship(Scaffold, backref=orm.backref("histories", cascade="all, delete-orphan"))
 
     __table_args__ = (
         sa.UniqueConstraint("name", "version"),
     )
+
+    def swap(self, scaffold):
+        for t in scaffold.templates:
+            self.templates.append(
+                TemplateHistory(name=t.name,
+                                content=t.content,
+                                input_encoding=t.input_encoding,
+                                output_encoding=t.output_encoding))
 
 
 class TemplateHistory(TimeMixin, Base):
@@ -118,7 +156,6 @@ class TemplateHistory(TimeMixin, Base):
     content = sa.Column(sa.Text, nullable=False, default="")
     input_encoding = sa.Column(sa.String(length=16), nullable="False", default="utf-8")
     output_encoding = sa.Column(sa.String(length=16), nullable="False", default="utf-8")
-    template_id = sa.Column(sa.Integer, sa.ForeignKey("scaffold.id"))
     scaffold_history_id = sa.Column(sa.Integer, sa.ForeignKey("scaffold_history.id"))
     scaffold = orm.relationship(ScaffoldHistory, backref=orm.backref("templates", cascade="all, delete-orphan"))
 
