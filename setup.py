@@ -50,5 +50,6 @@ setup(name='urakata',
       clean = urakata.scripts.clean:Clean
       scan = urakata.scripts.scan:Scan
       emit = urakata.scripts.emit:Emit
+      register = urakata.scripts.register:Register
       """,
       )

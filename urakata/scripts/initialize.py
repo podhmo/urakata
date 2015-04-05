@@ -35,4 +35,4 @@ class Initialize(Command):
                 transaction.commit()
             except:
                 self.log.exception("hmm")
-                transaction.rollback()
+                transaction.abort()

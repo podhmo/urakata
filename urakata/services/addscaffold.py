@@ -13,7 +13,7 @@ class AddScaffold(object):
     @reify
     def repository(self):
         # xxx:
-        return Session.query(Repository).filter(account=self.acount).first()
+        return Session.query(Repository).filter(Repository.account == self.account).first()
 
     def add_repository(self):
         return self.account.register_repository(name=self.account.name)
@@ -36,7 +36,7 @@ class AddScaffold(object):
         if self.repository is None:
             self.repository = self.add_repository()
 
-        scaffold = self.repository.add_scaffold(data)
+        scaffold = self.add_scaffold(data)
         for template_data in data["templates"]:
             self.add_template(scaffold, template_data)
 
