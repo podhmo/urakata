@@ -10,6 +10,7 @@ def jsonize(name, config):
 
     return {
         "name": name,
+        "version": "0.0.1",
         "root": config.root,
         "parameters": list(config.parameters),
         "usages": config.usages,

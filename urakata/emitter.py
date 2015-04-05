@@ -3,7 +3,7 @@ import logging
 import sys
 import os.path
 from collections import Mapping
-from pyramid.decorator import reify
+from urakata.decorator import reify
 logger = logging.getLogger(__name__)
 
 

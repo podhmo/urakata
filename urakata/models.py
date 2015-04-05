@@ -53,6 +53,20 @@ class Repository(TimeMixin, Base):
     account = orm.relationship(Account, backref=orm.backref("repositories", cascade="all, delete-orphan"))
     name = sa.Column(sa.String(length=255), default="", nullable=False, unique=True)
 
+    def register_scaffold(self, name, version):
+        scaffold = Scaffold(name=name, version=version, repository=self)
+        session = object_session(self)
+        session.add(scaffold)
+        return scaffold
+
+    def has_scaffold(self, name):
+        return bool(self.get_scaffold(name))
+
+    def get_scaffold(self, name):
+        for s in self.scaffolds:
+            if s.name == s:
+                return s
+
 
 class Scaffold(TimeMixin, Base):
     __tablename__ = "scaffold"
@@ -61,6 +75,16 @@ class Scaffold(TimeMixin, Base):
     name = sa.Column(sa.String(length=255), default="", nullable=False, unique=True)
     repository_id = sa.Column(sa.Integer, sa.ForeignKey("repository.id"))
     repository = orm.relationship(Repository, backref=orm.backref("scaffolds", cascade="all, delete-orphan"))
+
+    def register_template(self, name, content, input_encoding="utf-8", output_encoding="utf-8"):
+        template = Template(name=name,
+                            scaffold=self,
+                            content=content,
+                            input_encoding=input_encoding,
+                            output_encoding=output_encoding)
+        session = object_session(self)
+        session.add(template)
+        return template
 
 
 class Template(TimeMixin, Base):

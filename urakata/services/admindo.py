@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 import logging
-from pyramid.decorator import reify
+from urakata.decorator import reify
 from . import get_registration
 from ..models import Account, Session
 logger = logging.getLogger(__name__)

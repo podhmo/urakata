@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 import re
 from collections import defaultdict, OrderedDict
-from pyramid.decorator import reify
+from urakata.decorator import reify
 from zope.interface import implementer
 from .interfaces import INameScanner, ITemplateScanner, IScanConfig
 

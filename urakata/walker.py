@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 import os
-from pyramid.decorator import reify
+from urakata.decorator import reify
 from .interfaces import (
     IScanConfig,
     IPredicateList
